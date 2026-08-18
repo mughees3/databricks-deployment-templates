@@ -123,7 +123,9 @@ resource "databricks_storage_credential" "uc" {
   }
   comment = "Storage credential for the UC data bucket."
 
-  depends_on = [databricks_metastore_assignment.this]
+  # Wait for the metastore assignment AND for the provisioning SP to be a
+  # workspace admin — otherwise this call is unauthorized.
+  depends_on = [local.workspace_ready]
 }
 
 resource "databricks_external_location" "uc" {
@@ -132,7 +134,7 @@ resource "databricks_external_location" "uc" {
   credential_name = databricks_storage_credential.uc.name
   comment         = "External location for the starter catalog's data."
 
-  depends_on = [databricks_metastore_assignment.this]
+  depends_on = [local.workspace_ready]
 }
 
 # ---------------------------------------------------------------------------
@@ -142,9 +144,23 @@ resource "databricks_catalog" "starter" {
   name         = var.catalog_name
   storage_root = databricks_external_location.uc.url
   comment      = "Starter catalog created by the template."
+
+  # ISOLATED = this catalog is only visible/usable from workspaces it's bound
+  # to. We bind it to this workspace below. Change to "OPEN" to share it across
+  # all workspaces on the metastore.
+  isolation_mode = "ISOLATED"
+
   properties = {
     purpose = "starter"
   }
 
   depends_on = [databricks_external_location.uc]
+}
+
+# Bind the isolated catalog to this workspace so users here can access it.
+resource "databricks_workspace_binding" "starter" {
+  securable_name = databricks_catalog.starter.name
+  securable_type = "catalog"
+  workspace_id   = databricks_mws_workspaces.this.workspace_id
+  binding_type   = "BINDING_TYPE_READ_WRITE"
 }

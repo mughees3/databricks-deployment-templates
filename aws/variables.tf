@@ -96,8 +96,14 @@ variable "catalog_name" {
 # ---------------------------------------------------------------------------
 variable "create_sql_warehouse" {
   type        = bool
-  description = "Create a small serverless-friendly SQL warehouse so users can query immediately."
+  description = "Create a small SQL warehouse so users can query immediately."
   default     = true
+}
+
+variable "sql_warehouse_serverless" {
+  type        = bool
+  description = "Use serverless SQL compute for the starter warehouse. Requires serverless SQL to be ENABLED for the account/region — if it isn't, set false to fall back to classic (PRO) compute."
+  default     = false
 }
 
 variable "workspace_admins" {

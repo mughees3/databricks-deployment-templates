@@ -15,8 +15,11 @@ resource "databricks_sql_endpoint" "starter" {
   auto_stop_mins   = 10         # idle-stop to control cost.
   max_num_clusters = 1
 
-  # Prefer serverless when the workspace supports it; falls back gracefully.
-  enable_serverless_compute = true
+  # Serverless requires the feature to be enabled for the account/region.
+  # Default is false (classic PRO) so the apply works everywhere; flip the
+  # sql_warehouse_serverless var to true where serverless is available.
+  enable_serverless_compute = var.sql_warehouse_serverless
+  warehouse_type            = "PRO" # PRO supports both classic and serverless.
 
   tags {
     custom_tags {
@@ -25,7 +28,8 @@ resource "databricks_sql_endpoint" "starter" {
     }
   }
 
-  depends_on = [databricks_metastore_assignment.this]
+  # Needs the SP to be workspace admin and the metastore assigned first.
+  depends_on = [local.workspace_ready]
 }
 
 # --- Grant workspace admin to named users ---------------------------------
@@ -40,6 +44,6 @@ resource "databricks_mws_permission_assignment" "admins" {
   for_each     = data.databricks_user.admins
   provider     = databricks.mws
   workspace_id = databricks_mws_workspaces.this.workspace_id
-  principal_id = each.value.id
+  principal_id = tonumber(each.value.id) # principal_id is numeric; the data source returns it as a string.
   permissions  = ["ADMIN"]
 }
