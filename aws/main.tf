@@ -49,9 +49,8 @@ resource "databricks_mws_workspaces" "this" {
   storage_configuration_id = databricks_mws_storage_configurations.this.storage_configuration_id
   network_id               = databricks_mws_networks.this.network_id
 
-  # Wait until the workspace is fully RUNNING before the workspace-scoped
-  # provider tries to create catalogs/warehouses inside it.
-  token {
-    comment = "Terraform (${local.name})"
-  }
+  # NOTE: no `token {}` block here on purpose. The resource already waits until
+  # the workspace is RUNNING, and a token block would try to mint a workspace
+  # PAT as the creating identity BEFORE it's a workspace admin (identity.tf
+  # grants that afterwards), which fails with "cannot create token".
 }

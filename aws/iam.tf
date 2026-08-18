@@ -39,13 +39,21 @@ resource "aws_iam_role_policy" "cross_account" {
   policy = data.databricks_aws_crossaccount_policy.this.json
 }
 
+# AWS IAM is eventually consistent: a freshly-created role isn't immediately
+# usable everywhere. Databricks validates the role the instant we register the
+# credential, so without a short pause the very first apply fails with
+# "please use a valid cross account IAM role". Wait it out.
+resource "time_sleep" "iam_propagation" {
+  depends_on      = [aws_iam_role_policy.cross_account]
+  create_duration = "30s"
+}
+
 # Register the role with the Databricks account as a "credential configuration".
 resource "databricks_mws_credentials" "this" {
   provider         = databricks.mws
   role_arn         = aws_iam_role.cross_account.arn
   credentials_name = "${local.name}-creds"
 
-  # IAM role propagation is eventually consistent; make sure the permissions
-  # policy is attached before Databricks validates the role.
-  depends_on = [aws_iam_role_policy.cross_account]
+  # Wait for the policy attachment AND the propagation delay above.
+  depends_on = [time_sleep.iam_propagation]
 }

@@ -30,5 +30,12 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.9"
     }
+
+    # Time — used to wait out AWS IAM eventual-consistency before Databricks
+    # validates the cross-account role (see iam.tf).
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.12"
+    }
   }
 }

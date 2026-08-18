@@ -29,12 +29,20 @@ resource "databricks_mws_permission_assignment" "provisioner_admin" {
   permissions  = ["ADMIN"]
 }
 
+# The admin grant is eventually consistent: for a few seconds after it's
+# created, the workspace API may still reject the SP with "Authentication
+# failed". Wait it out before creating any workspace-scoped object.
+resource "time_sleep" "admin_propagation" {
+  depends_on      = [databricks_mws_permission_assignment.provisioner_admin]
+  create_duration = "30s"
+}
+
 # Convenience list other files use in `depends_on` so no workspace-scoped
 # resource runs before the SP can actually authenticate + act as admin.
-# (Both the SP admin grant AND the metastore assignment must be in place.)
+# (Both the SP admin grant + its propagation AND the metastore assignment.)
 locals {
   workspace_ready = [
-    databricks_mws_permission_assignment.provisioner_admin,
+    time_sleep.admin_propagation,
     databricks_metastore_assignment.this,
   ]
 }

@@ -41,9 +41,12 @@ data "databricks_user" "admins" {
 }
 
 resource "databricks_mws_permission_assignment" "admins" {
-  for_each     = data.databricks_user.admins
+  # Key off the static variable, NOT the data source. Using the data source
+  # here makes for_each keys "known only after apply", which breaks plan and
+  # import ("Invalid for_each argument").
+  for_each     = toset(var.workspace_admins)
   provider     = databricks.mws
   workspace_id = databricks_mws_workspaces.this.workspace_id
-  principal_id = tonumber(each.value.id) # principal_id is numeric; the data source returns it as a string.
+  principal_id = tonumber(data.databricks_user.admins[each.key].id) # principal_id is numeric; the data source returns a string.
   permissions  = ["ADMIN"]
 }
