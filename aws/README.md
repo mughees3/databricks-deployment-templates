@@ -12,6 +12,11 @@ Provision a complete, governed Databricks environment on AWS from scratch:
 It's built to be **read, understood, and copied** — every file is heavily
 commented and each concern lives in its own `.tf` file.
 
+> **⚠️ Unofficial community template, provided as-is** — not an official
+> Databricks product and not supported by Databricks. Review IAM, networking,
+> and encryption against your own standards before production use. See the
+> [repository README](../README.md) for the full disclaimer.
+
 ---
 
 ## 1. What you need before you start (prerequisites)

@@ -8,6 +8,15 @@ time.
 Each cloud is a **self-contained Terraform root** you `cd` into and run — no
 hidden wiring, nothing to learn beyond standard Terraform.
 
+> **⚠️ Unofficial / community template — not a Databricks product.**
+> This is a personal, community-maintained project. It is **not** an official
+> Databricks offering and is **not** supported, endorsed, or warranted by
+> Databricks. It is provided **as-is, without warranty of any kind**. You are
+> responsible for reviewing every resource — especially IAM scope, networking,
+> and encryption — against your own organization's security and compliance
+> standards before using it in production. Running these templates creates real,
+> billable cloud resources in your accounts.
+
 ## Available templates
 
 | Cloud | Status | What it provisions | Guide |
@@ -81,6 +90,7 @@ workspace guide, keep the file names and variable conventions identical.
 
 ---
 
-> These templates are provided as starters for enablement/activation. Review IAM
-> scope, networking, and encryption against your organization's standards before
+> These templates are provided as starters for enablement/activation. See the
+> unofficial/community disclaimer at the top of this README. Review IAM scope,
+> networking, and encryption against your organization's standards before
 > production use.
