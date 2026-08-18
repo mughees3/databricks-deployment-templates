@@ -30,6 +30,26 @@ commented and each concern lives in its own `.tf` file.
 > region, set `create_metastore = false` and provide `existing_metastore_id`
 > (see step 3).
 
+### Pre-flight checklist — the things that actually block an apply
+
+These aren't code issues; they're environmental. Check them before you run:
+
+- [ ] **Databricks service principal is an *Account admin*** — it must be able to
+      create workspaces and a metastore. (The template makes it a *workspace*
+      admin automatically; it can't grant itself *account* admin.)
+- [ ] **AWS creds can create IAM roles, VPCs, and S3 buckets** — an admin or
+      equivalent policy. Cross-account role creation is the usual permission gap.
+- [ ] **AWS service quotas in the target region** (default account limits are low):
+      - **VPCs per region** (default **5**) — a busy sandbox may be maxed out.
+      - **Elastic IPs per region** (default **5**) — the NAT gateway needs one.
+      - **NAT gateways per AZ** — one is created by default.
+- [ ] **Region supports Databricks E2 + Unity Catalog** — use a mainstream region
+      (us-west-2, us-east-1, eu-west-1, ap-southeast-2).
+- [ ] **Serverless SQL**: leave `sql_warehouse_serverless = false` unless you've
+      confirmed serverless SQL is enabled for the account/region.
+- [ ] **`workspace_admins` emails already exist as account users** — the lookup
+      fails on unknown users. Leave the list empty to skip.
+
 ---
 
 ## 2. Understand the layout
@@ -42,6 +62,7 @@ aws/
 ├── main.tf                  # Locals + the workspace resource (the keystone)
 ├── network.tf               # VPC, subnets, security group, VPC endpoints
 ├── iam.tf                   # Cross-account IAM role Databricks assumes
+├── identity.tf              # Grants the provisioning SP admin on the workspace
 ├── storage.tf               # Workspace root S3 bucket + policy
 ├── unity_catalog.tf         # Metastore, storage credential, catalog
 ├── workspace_resources.tf   # Starter SQL warehouse + admin grants
@@ -151,6 +172,10 @@ This is a **starter**. Common next changes:
 | `AuthorizationError` creating IAM | Your AWS creds lack IAM permissions. Use an admin role. |
 | Workspace stuck / credential validation fails | IAM role propagation delay — re-run `apply`; the `depends_on` usually handles it. |
 | `default credentials` errors for Databricks | You didn't export `TF_VAR_databricks_client_id/secret`, or the SP lacks Account admin. |
+| `PERMISSION_DENIED` on catalog / storage credential / warehouse | The provisioning SP isn't a workspace admin. `identity.tf` handles this automatically — ensure it applied and re-run. |
+| SQL warehouse creation fails / serverless not available | Set `sql_warehouse_serverless = false` (classic PRO works everywhere). |
+| `cannot read user` for a workspace admin | An email in `workspace_admins` isn't an account user yet. Remove it or invite them first. |
+| `LimitExceeded` on VPC or Elastic IP | AWS quota hit — see the pre-flight checklist. Request a quota increase or clean up unused VPCs/EIPs. |
 | Bucket name already exists | S3 names are global; the random suffix normally avoids this — re-run to get a new suffix. |
 
 ---
