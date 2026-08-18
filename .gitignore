@@ -1,0 +1,33 @@
+# ---- Terraform ----
+# Local state and its backups — may contain secrets, never commit.
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Real variable values (may contain account IDs / config you don't want public).
+# The *.example templates ARE committed; the real files are not.
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+
+# Provider plugins and module caches.
+.terraform/
+.terraform.lock.hcl.bak
+
+# Plan output files.
+*.tfplan
+plan.out
+
+# ---- Secrets / env ----
+.env
+.env.*
+*.pem
+*.key
+
+# ---- OS / editor cruft ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

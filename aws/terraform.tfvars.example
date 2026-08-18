@@ -1,0 +1,45 @@
+###############################################################################
+# terraform.tfvars.example
+# -----------------------------------------------------------------------------
+# HOW TO USE:
+#   1. Copy this file to `terraform.tfvars`:   cp terraform.tfvars.example terraform.tfvars
+#   2. Edit the NON-SECRET values below.
+#   3. Do NOT put secrets here. Provide these two as environment variables:
+#        export TF_VAR_databricks_client_id="<oauth-app-client-id>"
+#        export TF_VAR_databricks_client_secret="<oauth-app-secret>"
+#
+# terraform.tfvars is gitignored so your values never get committed.
+###############################################################################
+
+# --- Databricks account (NON-secret) --------------------------------------
+# Find this in the account console (accounts.cloud.databricks.com), top-right.
+databricks_account_id = "00000000-0000-0000-0000-000000000000"
+
+# --- AWS --------------------------------------------------------------------
+aws_region = "us-west-2"
+# aws_profile = "my-sso-profile"   # uncomment if you use a named AWS profile
+
+# --- Naming & tags ----------------------------------------------------------
+prefix = "dbx"
+tags = {
+  Owner       = "you@example.com"
+  Environment = "sandbox"
+  CostCenter  = "field-eng"
+}
+
+# --- Networking -------------------------------------------------------------
+cidr_block = "10.4.0.0/16"
+
+# --- Unity Catalog ----------------------------------------------------------
+# Only ONE metastore is allowed per region per account.
+#   * First workspace in a region:   create_metastore = true
+#   * Region already has a metastore: create_metastore = false + set the ID below
+create_metastore      = true
+# existing_metastore_id = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+catalog_name          = "main_demo"
+
+# --- Starter resources ------------------------------------------------------
+create_sql_warehouse = true
+workspace_admins = [
+  # "admin1@example.com",
+]
