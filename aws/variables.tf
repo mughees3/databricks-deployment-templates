@@ -102,8 +102,8 @@ variable "create_sql_warehouse" {
 
 variable "sql_warehouse_serverless" {
   type        = bool
-  description = "Use serverless SQL compute for the starter warehouse. Requires serverless SQL to be ENABLED for the account/region — if it isn't, set false to fall back to classic (PRO) compute."
-  default     = false
+  description = "Use serverless SQL compute for the starter warehouse (the recommended, showable default). Requires serverless SQL to be ENABLED for the account/region — set false to fall back to classic (PRO) compute if serverless isn't available."
+  default     = true
 }
 
 variable "workspace_admins" {

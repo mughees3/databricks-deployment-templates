@@ -40,9 +40,10 @@ catalog_name          = "main_demo"
 
 # --- Starter resources ------------------------------------------------------
 create_sql_warehouse = true
-# Serverless SQL must be enabled for your account/region. Leave false to use
-# classic (PRO) compute, which works everywhere.
-sql_warehouse_serverless = false
+# Serverless is the recommended, showable default. It requires serverless SQL to
+# be enabled for your account/region (it is for most). Set false only if you hit
+# a "serverless not available" error, to fall back to classic PRO compute.
+sql_warehouse_serverless = true
 
 # Emails MUST already exist as account-level users, or the lookup fails.
 # Leave empty to skip; the provisioning service principal is admin regardless.
